@@ -259,12 +259,12 @@ int diagonalCheck(char *board){
 }
 
 void computer_takeTurn(char *board, int player, char *piece_select){
-	printf("I made it to computer_takeTurn");
+	printf("~~Computer's Turn~~\n");
 	board[comp_best_move(board, player, piece_select)] = piece_select[player];
 }
 
 int comp_best_move (char *board, int player, char *piece_select){
-	printf("I made it to comp_best_move");
+//	printf("I made it to comp_best_move");
 	int x = 0;
 	int y = 0;
 	int row = 0;
@@ -273,11 +273,13 @@ int comp_best_move (char *board, int player, char *piece_select){
 	int move=num_cols/2;
 	
 	while(x<num_cols){
-		for(row = num_rows; row >= 0; row--){
+		for(row = 0; row <= num_rows; row++){
 			if(board[num_cols * row + x] == ' '){
 				y = num_cols * row + x;
 			}
 		}
+
+
 		this_score = calc_move(board,player,piece_select,y);
 		if(this_score > best_score){ //-calc_move(board,(player+1)%2,piece_select,y+num_cols
 			move = y;
@@ -287,7 +289,7 @@ int comp_best_move (char *board, int player, char *piece_select){
 		}
 		x=x+1;
 	}
-	printf("\x1b[34mcomp_best_move returns:%d\x1b[0m",move);
+//	printf("\x1b[34mcomp_best_move returns:%d\x1b[0m",move);
 	return move;
 }
 
@@ -300,7 +302,7 @@ int calc_move(char *board, int player, char *piece_select, int position){
 	
 	x = 0;      //setup for horizontal evaluation
 	while (x<7){
-		if ( (position+x-3) > num_rows*num_cols || (position+x-3) < 0){
+		if ( (position+x-3) > num_rows*num_cols-1 || (position+x-3) < 0){
 			evaluate[x] = -1;
 		}else{
 			switch (board[position+x-3]){
@@ -314,7 +316,7 @@ int calc_move(char *board, int player, char *piece_select, int position){
 					evaluate[x] = 0;
 					break;
 				default:
-					printf("could not determine contents");
+					printf("horizfail");
 					break;
 			}
 			if((position+x-3)%num_cols == num_cols-1 || (position+x-3)%num_cols == 0){
@@ -329,7 +331,7 @@ int calc_move(char *board, int player, char *piece_select, int position){
 	
 	x = 0;      //setup for vertical evaluation
 	while (x<7){
-		if ( (position+(x-3)*num_cols) > num_rows*num_cols || (position+(x-3)*num_cols) < 0){
+		if ( (position+(x-3)*num_cols) > num_rows*num_cols-1 || (position+(x-3)*num_cols) < 0){
 			evaluate[x] = -1;
 		}else{
 			switch (board[position+(x-3)*num_cols]){
@@ -344,12 +346,12 @@ int calc_move(char *board, int player, char *piece_select, int position){
 					break;
 				default:
 					evaluate[x] = 10;
-					printf("could not determine contents");
+					printf("vertfail");
 					break;
 			}
-			if( (position+(x-3)*num_cols)%num_cols == num_cols-1 || (position+(x-3)*num_cols)%num_cols == 0){
-				evaluate[x] = evaluate[x] + 3;
-			}
+//			if( (position+(x-3)*num_cols)%num_cols == num_cols-1 || (position+(x-3)*num_cols)%num_cols == 0){
+//				evaluate[x] = evaluate[x] + 3;
+//			}
 		}	
 		x=x+1;		
 	}
@@ -358,7 +360,7 @@ int calc_move(char *board, int player, char *piece_select, int position){
 	
 	x = 0;      //setup for lower left to upper right evaluation
 	while (x<7){
-		if( ( (position+(x-3)+(x-3)*num_cols)*num_cols) > num_rows*num_cols || (position+(x-3)+(x-3)*num_cols) < 0){
+		if( ( (position+(x-3)+(x-3)*num_cols)*num_cols) > num_rows*num_cols-1 || (position+(x-3)+(x-3)*num_cols) < 0){
 			evaluate[x] = -1;
 		}else{
 			switch (board[position+(x-3)+(x-3)*num_cols]){
@@ -372,7 +374,7 @@ int calc_move(char *board, int player, char *piece_select, int position){
 					evaluate[x] = 0;
 					break;
 				default:
-					printf("could not determine contents");
+					printf("diagonefail");
 					break;
 			}
 			if( (position+(x-3)+(x-3)*num_cols)%num_cols == num_cols-1 || (position+(x-3)+(x-3)*num_cols)%num_cols == 0){
@@ -386,7 +388,7 @@ int calc_move(char *board, int player, char *piece_select, int position){
 	
 	x = 0;      //setup for lower right to upper left evaluation
 	while (x<7){
-		if ( ( (position-(x-3)+(x-3)*num_cols)*num_cols) > num_rows*num_cols || (position-(x-3)+(x-3)*num_cols) < 0){
+		if ( ( (position-(x-3)+(x-3)*num_cols)*num_cols) > num_rows*num_cols-1 || (position-(x-3)+(x-3)*num_cols) < 0){
 			evaluate[x] = -1;
 		}else{
 			switch (board[position-(x-3)+(x-3)*num_cols]){
@@ -400,7 +402,7 @@ int calc_move(char *board, int player, char *piece_select, int position){
 					evaluate[x] = 0;
 					break;
 				default:
-					printf("could not determine contents");
+					printf("diagtwofail");
 					break;
 			}
 			if( (position-(x-3)+(x-3)*num_cols)%num_cols == num_cols-1 || (position-(x-3)+(x-3)*num_cols)%num_cols == 0){
@@ -469,7 +471,7 @@ int evaluation (int evaluate[],int player){
 	}
 	//is the move next to a group of 2 in a row? (with growth potential due to 0's)
 	if( (e1==e2 && (e1>0) && (e0==0 || e4==0) ) || (e2==e4 && (e2>0) && (e1==0 || e5==0) ) || (e4==e5 && (e4>0) && (e2==0||e6==0) ) ){
-		score == score + 100; //not as important as winning, next best thing, color less important
+		score = score + 100; //not as important as winning, next best thing, color less important
 	}
 	//does the move make a 2 chain?
 	if( (e2>0 && ( (e0==e1 && e0==0) || (e1==e4 && e1==0) || (e4==e5 && e4==0) ) )||(e4>0  && ( (e0==e1 && e0==0) || (e1==e4 && e1==0) || (e4==e5 && e4==0) ) ) ){
